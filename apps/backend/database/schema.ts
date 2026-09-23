@@ -68,6 +68,27 @@ export class RateSchema extends BaseModel {
   declare updatedAt: DateTime | null
 }
 
+export class SyncRunSchema extends BaseModel {
+  static $columns = ['error', 'finishedAt', 'id', 'latestDate', 'rowsUpserted', 'source', 'startedAt', 'status'] as const
+  $columns = SyncRunSchema.$columns
+  @column()
+  declare error: string | null
+  @column.dateTime()
+  declare finishedAt: DateTime | null
+  @column({ isPrimary: true })
+  declare id: number
+  @column.date()
+  declare latestDate: DateTime | null
+  @column()
+  declare rowsUpserted: number | null
+  @column()
+  declare source: string
+  @column.dateTime()
+  declare startedAt: DateTime
+  @column()
+  declare status: string | null
+}
+
 export class UserSchema extends BaseModel {
   static $columns = ['createdAt', 'email', 'fullName', 'id', 'password', 'updatedAt'] as const
   $columns = UserSchema.$columns

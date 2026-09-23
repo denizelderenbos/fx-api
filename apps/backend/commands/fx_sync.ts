@@ -3,9 +3,13 @@ import type { CommandOptions } from '@adonisjs/core/types/ace'
 import { inject } from '@adonisjs/core'
 import { FxSyncService } from '#services/fx_sync_service'
 
-export default class FxBackfill extends BaseCommand {
-  static commandName = 'fx:backfill'
-  static description = 'Import the full ECB exchange rate history and refresh currency metadata'
+/**
+ * Daily sync: imports the last 90 ECB trading days. Run it after 16:00 CET,
+ * when the ECB publishes the reference rates for the day.
+ */
+export default class FxSync extends BaseCommand {
+  static commandName = 'fx:sync'
+  static description = 'Import the last 90 days of ECB exchange rates and refresh currency metadata'
 
   static options: CommandOptions = {
     startApp: true,
@@ -13,8 +17,8 @@ export default class FxBackfill extends BaseCommand {
 
   @inject()
   async run(fxSync: FxSyncService) {
-    this.logger.info('Syncing full ECB history')
-    const result = await fxSync.sync('hist')
+    this.logger.info('Syncing recent ECB rates')
+    const result = await fxSync.sync('90d')
 
     if (result.unknownCurrencies.length > 0) {
       this.logger.warning(

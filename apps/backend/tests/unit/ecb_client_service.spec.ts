@@ -9,13 +9,13 @@ const CSV = [
   '',
 ].join('\n')
 
-test.group('EcbClientService.parseRates', () => {
+test.group('EcbClientService.parseCsvRates', () => {
   test('yields one entry per day without N/A values or the trailing empty column', async ({
     assert,
   }) => {
     const service = await app.container.make(EcbClientService)
 
-    const days = await Array.fromAsync(service.parseRates(CSV))
+    const days = await Array.fromAsync(service.parseCsvRates(CSV))
 
     assert.lengthOf(days, 2)
     assert.deepEqual(days[0], {
@@ -31,7 +31,7 @@ test.group('EcbClientService.parseRates', () => {
   test('keeps rates as strings so no precision is lost', async ({ assert }) => {
     const service = await app.container.make(EcbClientService)
 
-    const [day] = await Array.fromAsync(service.parseRates('Date,IDR,\n2024-01-03,20426.66,\n'))
+    const [day] = await Array.fromAsync(service.parseCsvRates('Date,IDR,\n2024-01-03,20426.66,\n'))
 
     assert.strictEqual(day.rates[0].rate, '20426.66')
   })
@@ -39,6 +39,59 @@ test.group('EcbClientService.parseRates', () => {
   test('surfaces parse errors as exceptions', async ({ assert }) => {
     const service = await app.container.make(EcbClientService)
 
-    await assert.rejects(() => Array.fromAsync(service.parseRates('Date,USD\n"2024-01-03,1.09\n')))
+    await assert.rejects(() =>
+      Array.fromAsync(service.parseCsvRates('Date,USD\n"2024-01-03,1.09\n'))
+    )
+  })
+})
+
+const XML = `<?xml version="1.0" encoding="UTF-8"?>
+<gesmes:Envelope xmlns:gesmes="http://www.gesmes.org/xml/2002-08-01" xmlns="http://www.ecb.int/vocabulary/2002-08-01/eurofxref">
+  <gesmes:subject>Reference rates</gesmes:subject>
+  <Cube>
+    <Cube time='2026-09-23'>
+      <Cube currency='USD' rate='1.1411'/>
+      <Cube currency='JPY' rate='180.20'/>
+    </Cube>
+    <Cube time='2026-09-22'>
+      <Cube currency='USD' rate='1.1463'/>
+    </Cube>
+  </Cube>
+</gesmes:Envelope>`
+
+test.group('EcbClientService.parseXmlRates', () => {
+  test('yields one entry per day with rates as strings', async ({ assert }) => {
+    const service = await app.container.make(EcbClientService)
+
+    const days = service.parseXmlRates(XML)
+
+    assert.deepEqual(days, [
+      {
+        date: '2026-09-23',
+        rates: [
+          { currency: 'USD', rate: '1.1411' },
+          { currency: 'JPY', rate: '180.20' },
+        ],
+      },
+      { date: '2026-09-22', rates: [{ currency: 'USD', rate: '1.1463' }] },
+    ])
+  })
+
+  test('handles a feed with a single day and a single rate', async ({ assert }) => {
+    const service = await app.container.make(EcbClientService)
+    const single = XML.replace(/<Cube time='2026-09-22'>[\s\S]*?<\/Cube>\s*/, '').replace(
+      "<Cube currency='JPY' rate='180.20'/>",
+      ''
+    )
+
+    const days = service.parseXmlRates(single)
+
+    assert.deepEqual(days, [{ date: '2026-09-23', rates: [{ currency: 'USD', rate: '1.1411' }] }])
+  })
+
+  test('rejects XML without rate cubes', async ({ assert }) => {
+    const service = await app.container.make(EcbClientService)
+
+    assert.throws(() => service.parseXmlRates('<gesmes:Envelope></gesmes:Envelope>'))
   })
 })

@@ -4,7 +4,7 @@ import db from '@adonisjs/lucid/services/db'
 import type { TransactionClientContract } from '@adonisjs/lucid/types/database'
 import { currencies as isoCurrencies } from 'countries-list/currencies'
 import { DateTime } from 'luxon'
-import type { EcbDailyRates } from '#services/ecb_client_service'
+import type { EcbRateFeed } from '#services/ecb_client_service'
 
 /**
  * Currencies the ECB has published rates for that no longer exist and
@@ -38,6 +38,8 @@ type RateRow = {
 export type ImportResult = {
   days: number
   rates: number
+  /** Most recent date in the imported data (ISO), null when the stream was empty. */
+  latestDate: string | null
   /** Codes that were in the ECB data but not in our currency list. Stored under their own code as name. */
   unknownCurrencies: string[]
 }
@@ -50,7 +52,7 @@ export class RateImportService {
    * Upserts every rate from the stream and refreshes the currency metadata,
    * all inside one transaction. Safe to run repeatedly.
    */
-  async import(days: AsyncIterable<EcbDailyRates>): Promise<ImportResult> {
+  async import(days: EcbRateFeed): Promise<ImportResult> {
     return db.transaction(async (trx) => {
       const now = DateTime.now().toISO()
       const known = await this.syncCurrencies(trx, now)
@@ -58,6 +60,7 @@ export class RateImportService {
       const buffer: RateRow[] = []
       let dayCount = 0
       let rateCount = 0
+      let latestDate: string | null = null
 
       const flush = async () => {
         if (buffer.length === 0) return
@@ -66,6 +69,7 @@ export class RateImportService {
 
       for await (const day of days) {
         dayCount++
+        if (latestDate === null || day.date > latestDate) latestDate = day.date
         buffer.push({
           date: day.date,
           currency: BASE_CURRENCY,
@@ -90,7 +94,12 @@ export class RateImportService {
 
       await this.refreshCurrencyMetadata(trx)
 
-      return { days: dayCount, rates: rateCount, unknownCurrencies: [...unknown].sort() }
+      return {
+        days: dayCount,
+        rates: rateCount,
+        latestDate,
+        unknownCurrencies: [...unknown].sort(),
+      }
     })
   }
 
