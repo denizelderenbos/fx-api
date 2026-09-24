@@ -1,0 +1,14 @@
+{{#var serviceName = generators.serviceName(entity.name)}}
+{{#var serviceFileName = generators.serviceFileName(entity.name)}}
+{{{
+  exports({
+    to: app.servicesPath(entity.path, serviceFileName)
+  })
+}}}
+import { inject } from '@adonisjs/core'
+import { Logger } from '@adonisjs/core/logger'
+
+@inject()
+export class {{ serviceName }} {
+  constructor(protected logger: Logger) {}
+}
