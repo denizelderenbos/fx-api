@@ -1,0 +1,1014 @@
+{
+  "info": {
+    "name": "FX API",
+    "description": "Eigen valuta-API op basis van ECB-referentiekoersen. Zet `baseUrl` in de collectievariabelen of een environment. Elke request heeft tests; gebruik de Collection Runner om alles in een keer te draaien.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3333"
+    }
+  ],
+  "item": [
+    {
+      "name": "Currencies",
+      "item": [
+        {
+          "name": "Alle valuta met koersen",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/currencies",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "currencies"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"JSON body\", () => pm.response.to.be.json);",
+                  "pm.test(\"Cache-Control is public\", () => pm.expect(pm.response.headers.get(\"Cache-Control\")).to.match(/public, max-age=\\d+/));",
+                  "const body = pm.response.json();",
+                  "pm.test(\"data is een array met valuta-objecten\", () => {",
+                  "  pm.expect(body.data).to.be.an(\"array\").that.is.not.empty;",
+                  "  for (const c of body.data) {",
+                  "    pm.expect(c).to.have.all.keys(\"code\", \"name\", \"is_active\", \"first_date\", \"last_date\");",
+                  "    pm.expect(c.code).to.match(/^[A-Z]{3}$/);",
+                  "    pm.expect(c.first_date).to.match(/^\\d{4}-\\d{2}-\\d{2}$/);",
+                  "  }",
+                  "});",
+                  "pm.test(\"gesorteerd op code\", () => {",
+                  "  const codes = body.data.map((c) => c.code);",
+                  "  pm.expect(codes).to.deep.equal([...codes].sort());",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Alleen actieve valuta",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/currencies?is_active=true",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "currencies"
+              ],
+              "query": [
+                {
+                  "key": "is_active",
+                  "value": "true"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.test(\"data is een array met valuta-objecten\", () => {",
+                  "  pm.expect(body.data).to.be.an(\"array\").that.is.not.empty;",
+                  "  for (const c of body.data) {",
+                  "    pm.expect(c).to.have.all.keys(\"code\", \"name\", \"is_active\", \"first_date\", \"last_date\");",
+                  "    pm.expect(c.code).to.match(/^[A-Z]{3}$/);",
+                  "    pm.expect(c.first_date).to.match(/^\\d{4}-\\d{2}-\\d{2}$/);",
+                  "  }",
+                  "});",
+                  "pm.test(\"gesorteerd op code\", () => {",
+                  "  const codes = body.data.map((c) => c.code);",
+                  "  pm.expect(codes).to.deep.equal([...codes].sort());",
+                  "});",
+                  "pm.test(\"alles is actief\", () => pm.expect(pm.response.json().data.every((c) => c.is_active === true)).to.be.true);",
+                  "pm.test(\"EUR zit erin\", () => pm.expect(pm.response.json().data.map((c) => c.code)).to.include(\"EUR\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Alleen vervallen valuta",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/currencies?is_active=false",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "currencies"
+              ],
+              "query": [
+                {
+                  "key": "is_active",
+                  "value": "false"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.test(\"data is een array met valuta-objecten\", () => {",
+                  "  pm.expect(body.data).to.be.an(\"array\").that.is.not.empty;",
+                  "  for (const c of body.data) {",
+                  "    pm.expect(c).to.have.all.keys(\"code\", \"name\", \"is_active\", \"first_date\", \"last_date\");",
+                  "    pm.expect(c.code).to.match(/^[A-Z]{3}$/);",
+                  "    pm.expect(c.first_date).to.match(/^\\d{4}-\\d{2}-\\d{2}$/);",
+                  "  }",
+                  "});",
+                  "pm.test(\"gesorteerd op code\", () => {",
+                  "  const codes = body.data.map((c) => c.code);",
+                  "  pm.expect(codes).to.deep.equal([...codes].sort());",
+                  "});",
+                  "pm.test(\"niets is actief\", () => pm.expect(pm.response.json().data.some((c) => c.is_active)).to.be.false);",
+                  "pm.test(\"HRK zit erin\", () => pm.expect(pm.response.json().data.map((c) => c.code)).to.include(\"HRK\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Ongeldig filter (422)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/currencies?is_active=maybe",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "currencies"
+              ],
+              "query": [
+                {
+                  "key": "is_active",
+                  "value": "maybe"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 422\", () => pm.response.to.have.status(422));",
+                  "pm.test(\"Fout is niet cachebaar\", () => pm.expect(pm.response.headers.get(\"Cache-Control\") || \"\").to.not.include(\"public\"));",
+                  "pm.test(\"fout op veld is_active\", () => pm.expect(pm.response.json().errors.map((e) => e.field)).to.include(\"is_active\"));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Rates op datum",
+      "item": [
+        {
+          "name": "Handelsdag, USD naar EUR en GBP",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/rates/2024-01-15?base=USD&symbols=EUR,GBP",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "rates",
+                "2024-01-15"
+              ],
+              "query": [
+                {
+                  "key": "base",
+                  "value": "USD"
+                },
+                {
+                  "key": "symbols",
+                  "value": "EUR,GBP"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"JSON body\", () => pm.response.to.be.json);",
+                  "pm.test(\"Cache-Control is public\", () => pm.expect(pm.response.headers.get(\"Cache-Control\")).to.match(/public, max-age=\\d+/));",
+                  "const body = pm.response.json();",
+                  "pm.test(\"koersset heeft base, requested_date, date en rates\", () => {",
+                  "  pm.expect(body).to.include.all.keys(\"base\", \"requested_date\", \"date\", \"rates\");",
+                  "  pm.expect(body.date).to.match(/^\\d{4}-\\d{2}-\\d{2}$/);",
+                  "  for (const [code, rate] of Object.entries(body.rates)) {",
+                  "    pm.expect(code).to.match(/^[A-Z]{3}$/);",
+                  "    pm.expect(rate, code).to.be.a(\"string\").and.match(/^\\d+\\.\\d{6}$/);",
+                  "  }",
+                  "});",
+                  "pm.test(\"datum is de gevraagde datum\", () => pm.expect(pm.response.json().date).to.equal(\"2024-01-15\"));",
+                  "pm.test(\"precies EUR en GBP\", () => pm.expect(Object.keys(pm.response.json().rates).sort()).to.deep.equal([\"EUR\", \"GBP\"]));",
+                  "pm.test(\"USD naar EUR ligt rond 0.91\", () => pm.expect(Number(pm.response.json().rates.EUR)).to.be.within(0.85, 0.95));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Zaterdag valt terug op vrijdag",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/rates/2024-01-13",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "rates",
+                "2024-01-13"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.test(\"koersset heeft base, requested_date, date en rates\", () => {",
+                  "  pm.expect(body).to.include.all.keys(\"base\", \"requested_date\", \"date\", \"rates\");",
+                  "  pm.expect(body.date).to.match(/^\\d{4}-\\d{2}-\\d{2}$/);",
+                  "  for (const [code, rate] of Object.entries(body.rates)) {",
+                  "    pm.expect(code).to.match(/^[A-Z]{3}$/);",
+                  "    pm.expect(rate, code).to.be.a(\"string\").and.match(/^\\d+\\.\\d{6}$/);",
+                  "  }",
+                  "});",
+                  "pm.test(\"base is EUR (default)\", () => pm.expect(pm.response.json().base).to.equal(\"EUR\"));",
+                  "pm.test(\"requested_date 2024-01-13, date 2024-01-12\", () => {",
+                  "  pm.expect(pm.response.json().requested_date).to.equal(\"2024-01-13\");",
+                  "  pm.expect(pm.response.json().date).to.equal(\"2024-01-12\");",
+                  "});",
+                  "pm.test(\"alle actieve valuta, EUR niet als eigen koers\", () => {",
+                  "  const rates = pm.response.json().rates;",
+                  "  pm.expect(Object.keys(rates).length).to.be.above(20);",
+                  "  pm.expect(rates).to.not.have.property(\"EUR\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Kleine letters worden genormaliseerd",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/rates/2024-01-15?base=usd&symbols=eur,gbp",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "rates",
+                "2024-01-15"
+              ],
+              "query": [
+                {
+                  "key": "base",
+                  "value": "usd"
+                },
+                {
+                  "key": "symbols",
+                  "value": "eur,gbp"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"base is USD\", () => pm.expect(pm.response.json().base).to.equal(\"USD\"));",
+                  "pm.test(\"symbols in hoofdletters\", () => pm.expect(Object.keys(pm.response.json().rates).sort()).to.deep.equal([\"EUR\", \"GBP\"]));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "EUR als symbol met EUR als base",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/rates/2024-01-15?symbols=USD",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "rates",
+                "2024-01-15"
+              ],
+              "query": [
+                {
+                  "key": "symbols",
+                  "value": "USD"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.test(\"koersset heeft base, requested_date, date en rates\", () => {",
+                  "  pm.expect(body).to.include.all.keys(\"base\", \"requested_date\", \"date\", \"rates\");",
+                  "  pm.expect(body.date).to.match(/^\\d{4}-\\d{2}-\\d{2}$/);",
+                  "  for (const [code, rate] of Object.entries(body.rates)) {",
+                  "    pm.expect(code).to.match(/^[A-Z]{3}$/);",
+                  "    pm.expect(rate, code).to.be.a(\"string\").and.match(/^\\d+\\.\\d{6}$/);",
+                  "  }",
+                  "});",
+                  "pm.test(\"EUR naar USD ligt rond 1.10\", () => pm.expect(Number(pm.response.json().rates.USD)).to.be.within(1.0, 1.2));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Ongeldige datum (422)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/rates/2024-02-30",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "rates",
+                "2024-02-30"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 422\", () => pm.response.to.have.status(422));",
+                  "pm.test(\"Fout is niet cachebaar\", () => pm.expect(pm.response.headers.get(\"Cache-Control\") || \"\").to.not.include(\"public\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Verkeerd datumformaat (422)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/rates/15-01-2024",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "rates",
+                "15-01-2024"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 422\", () => pm.response.to.have.status(422));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Lege symbols (422)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/rates/2024-01-15?symbols=",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "rates",
+                "2024-01-15"
+              ],
+              "query": [
+                {
+                  "key": "symbols",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 422\", () => pm.response.to.have.status(422));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Dubbele symbols (422)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/rates/2024-01-15?symbols=EUR,EUR",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "rates",
+                "2024-01-15"
+              ],
+              "query": [
+                {
+                  "key": "symbols",
+                  "value": "EUR,EUR"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 422\", () => pm.response.to.have.status(422));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Onbekende base (404)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/rates/2024-01-15?base=XYZ",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "rates",
+                "2024-01-15"
+              ],
+              "query": [
+                {
+                  "key": "base",
+                  "value": "XYZ"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 404\", () => pm.response.to.have.status(404));",
+                  "pm.test(\"Fout is niet cachebaar\", () => pm.expect(pm.response.headers.get(\"Cache-Control\") || \"\").to.not.include(\"public\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Vervallen valuta na einddatum (404)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/rates/2023-06-01?base=HRK",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "rates",
+                "2023-06-01"
+              ],
+              "query": [
+                {
+                  "key": "base",
+                  "value": "HRK"
+                }
+              ]
+            },
+            "description": "HRK is per 2023-01-01 vervangen door de euro; op of vlak voor 2023-06-01 is er geen koers."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 404\", () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Datum voor 1999-01-04 (404)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/rates/1998-12-31",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "rates",
+                "1998-12-31"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 404\", () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Datum in de toekomst valt terug op laatste dag",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/rates/2999-01-01",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "rates",
+                "2999-01-01"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"date is niet in de toekomst\", () => pm.expect(pm.response.json().date <= new Date().toISOString().slice(0, 10)).to.be.true);"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Rates latest",
+      "description": "Route staat nog uitgecommentarieerd in start/routes.ts.",
+      "item": [
+        {
+          "name": "Latest, USD naar EUR en GBP",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/rates/latest?base=USD&symbols=EUR,GBP",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "rates",
+                "latest"
+              ],
+              "query": [
+                {
+                  "key": "base",
+                  "value": "USD"
+                },
+                {
+                  "key": "symbols",
+                  "value": "EUR,GBP"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.test(\"koersset heeft base, requested_date, date en rates\", () => {",
+                  "  pm.expect(body).to.include.all.keys(\"base\", \"requested_date\", \"date\", \"rates\");",
+                  "  pm.expect(body.date).to.match(/^\\d{4}-\\d{2}-\\d{2}$/);",
+                  "  for (const [code, rate] of Object.entries(body.rates)) {",
+                  "    pm.expect(code).to.match(/^[A-Z]{3}$/);",
+                  "    pm.expect(rate, code).to.be.a(\"string\").and.match(/^\\d+\\.\\d{6}$/);",
+                  "  }",
+                  "});",
+                  "pm.test(\"date is maximaal 5 dagen oud\", () => {",
+                  "  const ageDays = (Date.now() - new Date(pm.response.json().date)) / 86400000;",
+                  "  pm.expect(ageDays).to.be.below(5);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Latest zonder parameters",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/rates/latest",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "rates",
+                "latest"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.test(\"koersset heeft base, requested_date, date en rates\", () => {",
+                  "  pm.expect(body).to.include.all.keys(\"base\", \"requested_date\", \"date\", \"rates\");",
+                  "  pm.expect(body.date).to.match(/^\\d{4}-\\d{2}-\\d{2}$/);",
+                  "  for (const [code, rate] of Object.entries(body.rates)) {",
+                  "    pm.expect(code).to.match(/^[A-Z]{3}$/);",
+                  "    pm.expect(rate, code).to.be.a(\"string\").and.match(/^\\d+\\.\\d{6}$/);",
+                  "  }",
+                  "});",
+                  "pm.test(\"base is EUR\", () => pm.expect(pm.response.json().base).to.equal(\"EUR\"));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Nog te bouwen (ontwerp)",
+      "description": "Endpoints uit het systeemontwerp die nog niet bestaan. Verwacht 404 tot ze er zijn.",
+      "item": [
+        {
+          "name": "Timeseries USD naar EUR, Q1 2024",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/rates/timeseries?base=USD&symbols=EUR&from=2024-01-01&to=2024-03-31",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "rates",
+                "timeseries"
+              ],
+              "query": [
+                {
+                  "key": "base",
+                  "value": "USD"
+                },
+                {
+                  "key": "symbols",
+                  "value": "EUR"
+                },
+                {
+                  "key": "from",
+                  "value": "2024-01-01"
+                },
+                {
+                  "key": "to",
+                  "value": "2024-03-31"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Convert 100 USD naar GBP op datum",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/convert?from=USD&to=GBP&amount=100&date=2024-01-15",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "convert"
+              ],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "USD"
+                },
+                {
+                  "key": "to",
+                  "value": "GBP"
+                },
+                {
+                  "key": "amount",
+                  "value": "100"
+                },
+                {
+                  "key": "date",
+                  "value": "2024-01-15"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"amount, rate en result aanwezig\", () => pm.expect(pm.response.json()).to.include.all.keys(\"amount\", \"rate\", \"result\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Convert zonder datum (latest)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/convert?from=USD&to=GBP&amount=100",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "convert"
+              ],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "USD"
+                },
+                {
+                  "key": "to",
+                  "value": "GBP"
+                },
+                {
+                  "key": "amount",
+                  "value": "100"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
