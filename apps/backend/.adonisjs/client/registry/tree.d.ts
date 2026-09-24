@@ -5,4 +5,7 @@ export interface ApiDefinition {
   currencies: {
     index: typeof routes['currencies.index']
   }
+  rates: {
+    ratesByDate: typeof routes['rates.rates_by_date']
+  }
 }

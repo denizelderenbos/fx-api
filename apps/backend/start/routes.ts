@@ -17,6 +17,12 @@ router.get('/', () => {
 router
   .group(() => {
     router.get('currencies', [controllers.Currencies, 'index'])
+    // GET /api/v1/rates/latest?base=USD&symbols=EUR,GBP
+    // router.get('rates/latest', [controllers.Rates, 'latest'])
+
+    // GET /api/v1/rates/2024-01-15?base=USD&symbols=EUR,GBP
+    router.get('rates/:date', [controllers.Rates, 'ratesByDate'])
+
     // router
     //   .group(() => {
     //     router.post('signup', [controllers.NewAccount, 'store'])
