@@ -1,4 +1,4 @@
-import { BaseCommand } from '@adonisjs/core/ace'
+import { BaseCommand, flags } from '@adonisjs/core/ace'
 import type { CommandOptions } from '@adonisjs/core/types/ace'
 import { inject } from '@adonisjs/core'
 import { FxSyncService } from '#services/fx_sync_service'
@@ -11,8 +11,16 @@ export default class FxBackfill extends BaseCommand {
     startApp: true,
   }
 
+  @flags.boolean({ description: 'Skip when the full history has already been imported once' })
+  declare ifMissing: boolean
+
   @inject()
   async run(fxSync: FxSyncService) {
+    if (this.ifMissing && (await fxSync.hasFullHistory())) {
+      this.logger.info('Full ECB history already imported, skipping')
+      return
+    }
+
     this.logger.info('Syncing full ECB history')
     const result = await fxSync.sync('hist')
 
