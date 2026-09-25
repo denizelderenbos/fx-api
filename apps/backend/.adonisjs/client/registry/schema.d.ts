@@ -62,7 +62,7 @@ export interface Registry {
       body: {}
       paramsTuple: []
       params: {}
-      query: ExtractQueryForGet<InferInput<(typeof import('#validators/rate').convertValidator)>>
+      query: ExtractQueryForGet<InferInput<(typeof import('#validators/conversion').convertValidator)>>
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/conversions_controller').default['show']>>>
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/conversions_controller').default['show']>>> | { status: 422; response: { errors: SimpleError[] } }
     }
