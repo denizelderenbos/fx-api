@@ -77,7 +77,6 @@ const dbConfig = defineConfig({
       debug: false,
     },
 
-
     /**
      * MySQL / MariaDB connection.
      * Install package to switch: npm install mysql2
