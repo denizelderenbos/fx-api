@@ -73,6 +73,7 @@
     "better-sqlite3": "^13.0.3",
     "big.js": "^7.0.1",
     "countries-list": "^3.4.1",
+    "date-fns": "^4.4.0",
     "fast-csv": "^5.0.7",
     "fast-xml-parser": "^5.11.1",
     "luxon": "^3.7.2",

@@ -31,6 +31,18 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/rates_controller').default['latestRates']>>> | { status: 422; response: { errors: SimpleError[] } }
     }
   }
+  'rates.timeseries': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/rates/timeseries'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: ExtractQueryForGet<InferInput<(typeof import('#validators/rate').timeseriesValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/rates_controller').default['timeseries']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/rates_controller').default['timeseries']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
   'rates.rates_by_date': {
     methods: ["GET","HEAD"]
     pattern: '/api/v1/rates/:date'

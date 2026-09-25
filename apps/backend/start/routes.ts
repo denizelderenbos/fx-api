@@ -18,8 +18,12 @@ router
   .group(() => {
     router.get('currencies', [controllers.Currencies, 'index'])
     // GET /api/v1/rates/latest?base=USD&symbols=EUR,GBP
-    // GET /api/v1/rates/2024-01-15?base=USD&symbols=EUR,GBP
     router.get('rates/latest', [controllers.Rates, 'latestRates'])
+
+    // GET /api/v1/rates/timeseries?base=USD&symbols=EUR&from=2024-01-01&to=2024-03-31
+    router.get('rates/timeseries', [controllers.Rates, 'timeseries'])
+
+    // GET /api/v1/rates/2024-01-15?base=USD&symbols=EUR,GBP
     router.get('rates/:date', [controllers.Rates, 'ratesByDate'])
 
     // router

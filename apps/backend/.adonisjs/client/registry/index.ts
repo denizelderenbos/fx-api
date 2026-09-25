@@ -18,6 +18,12 @@ const routes = {
     tokens: [{"old":"/api/v1/rates/latest","type":0,"val":"api","end":""},{"old":"/api/v1/rates/latest","type":0,"val":"v1","end":""},{"old":"/api/v1/rates/latest","type":0,"val":"rates","end":""},{"old":"/api/v1/rates/latest","type":0,"val":"latest","end":""}],
     types: placeholder as Registry['rates.latest_rates']['types'],
   },
+  'rates.timeseries': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/rates/timeseries',
+    tokens: [{"old":"/api/v1/rates/timeseries","type":0,"val":"api","end":""},{"old":"/api/v1/rates/timeseries","type":0,"val":"v1","end":""},{"old":"/api/v1/rates/timeseries","type":0,"val":"rates","end":""},{"old":"/api/v1/rates/timeseries","type":0,"val":"timeseries","end":""}],
+    types: placeholder as Registry['rates.timeseries']['types'],
+  },
   'rates.rates_by_date': {
     methods: ["GET","HEAD"],
     pattern: '/api/v1/rates/:date',
