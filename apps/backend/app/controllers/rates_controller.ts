@@ -1,21 +1,12 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import { inject } from '@adonisjs/core'
-import {
-  convertValidator,
-  latestRatesValidator,
-  ratesByDateValidator,
-  timeseriesValidator,
-} from '#validators/rate'
+import { latestRatesValidator, ratesByDateValidator, timeseriesValidator } from '#validators/rate'
 import { RateService } from '#services/rate_service'
 import RateSetTransformer from '#transformers/rate_set_transformer'
 import { DateTime } from 'luxon'
 import { addYears, isAfter, parseISO } from 'date-fns'
 import TimeseriesRateSetTransformer from '#transformers/timeseries_rate_set_transformer'
-import ConversionTransformer from '#transformers/conversion_transformer'
-import Big from 'big.js'
-
-const ONE_YEAR = 31_536_000
-const FIVE_MINUTES = 300
+import { cacheControl } from '#helpers/cache_helper'
 
 /** Longest timeseries, and the longest one allowed without `symbols`. */
 const MAX_YEARS = 5
@@ -36,7 +27,7 @@ export default class RatesController {
     // Als de aangevraagde datum op of vóór de latestDate ligt, is het antwoord definitief.
     // Beide datums zijn 'yyyy-MM-dd'-strings, dus de stringvergelijking volgt de kalender.
     const isFinal = params.date <= rates.latestDate
-    response.header('Cache-Control', `public, max-age=${isFinal ? ONE_YEAR : FIVE_MINUTES}`)
+    response.header('Cache-Control', cacheControl(isFinal))
 
     return serialize.withoutWrapping(RateSetTransformer.transform(rates))
   }
@@ -53,7 +44,8 @@ export default class RatesController {
       return response.notFound({ message: `No rates found for ${base}` })
     }
 
-    response.header('Cache-Control', `public, max-age=${FIVE_MINUTES}`)
+    // Latest moves with every sync, so it is never final.
+    response.header('Cache-Control', cacheControl(false))
     return serialize.withoutWrapping(RateSetTransformer.transform(rates))
   }
 
@@ -88,26 +80,8 @@ export default class RatesController {
     // Without an explicit `to` the series grows with every sync, so it is never final.
     // Both are 'yyyy-MM-dd' strings, so string comparison follows the calendar.
     const isFinal = input.to !== undefined && input.to <= rates.latestDate
-    response.header('Cache-Control', `public, max-age=${isFinal ? ONE_YEAR : FIVE_MINUTES}`)
+    response.header('Cache-Control', cacheControl(isFinal))
 
     return serialize.withoutWrapping(TimeseriesRateSetTransformer.transform(rates))
-  }
-
-  // GET /api/v1/convert?from=USD&to=GBP&amount=100&date=2024-01-15
-  async convert({ request, response, serialize }: HttpContext) {
-    const input = await request.validateUsing(convertValidator)
-    const { from, to, amount } = input
-    const date = input.date ?? DateTime.now().toISODate()!
-
-    const conversion = await this.ratesService.convert(date, { from, to, amount: Big(amount) })
-    if (!conversion) {
-      return response.notFound({ message: `No rate found from ${from} to ${to} on ${date}` })
-    }
-
-    // Without an explicit date the answer moves with every sync, so it is never final.
-    const isFinal = input.date !== undefined && input.date <= conversion.latestDate
-    response.header('Cache-Control', `public, max-age=${isFinal ? ONE_YEAR : FIVE_MINUTES}`)
-
-    return serialize.withoutWrapping(ConversionTransformer.transform(conversion))
   }
 }

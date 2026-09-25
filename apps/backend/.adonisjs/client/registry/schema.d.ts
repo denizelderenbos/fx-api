@@ -55,7 +55,7 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/rates_controller').default['ratesByDate']>>> | { status: 422; response: { errors: SimpleError[] } }
     }
   }
-  'rates.convert': {
+  'conversions.show': {
     methods: ["GET","HEAD"]
     pattern: '/api/v1/convert'
     types: {
@@ -63,8 +63,8 @@ export interface Registry {
       paramsTuple: []
       params: {}
       query: ExtractQueryForGet<InferInput<(typeof import('#validators/rate').convertValidator)>>
-      response: ExtractResponse<Awaited<ReturnType<import('#controllers/rates_controller').default['convert']>>>
-      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/rates_controller').default['convert']>>> | { status: 422; response: { errors: SimpleError[] } }
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/conversions_controller').default['show']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/conversions_controller').default['show']>>> | { status: 422; response: { errors: SimpleError[] } }
     }
   }
 }

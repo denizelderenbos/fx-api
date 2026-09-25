@@ -9,6 +9,8 @@ export interface ApiDefinition {
     latestRates: typeof routes['rates.latest_rates']
     timeseries: typeof routes['rates.timeseries']
     ratesByDate: typeof routes['rates.rates_by_date']
-    convert: typeof routes['rates.convert']
+  }
+  conversions: {
+    show: typeof routes['conversions.show']
   }
 }
