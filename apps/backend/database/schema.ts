@@ -51,6 +51,17 @@ export class CurrencySchema extends BaseModel {
   declare updatedAt: DateTime | null
 }
 
+export class RateLimitSchema extends BaseModel {
+  static $columns = ['expire', 'key', 'points'] as const
+  $columns = RateLimitSchema.$columns
+  @column()
+  declare expire: bigint | number | null
+  @column({ isPrimary: true })
+  declare key: string
+  @column()
+  declare points: number
+}
+
 export class RateSchema extends BaseModel {
   static $columns = ['createdAt', 'currency', 'date', 'id', 'rate', 'updatedAt'] as const
   $columns = RateSchema.$columns

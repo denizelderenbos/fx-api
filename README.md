@@ -145,6 +145,18 @@ GET /convert?from=USD&to=GBP&amount=100&date=2024-01-15
 | `422`  | Invalid input: a malformed date or currency code, a non-positive amount, `from` after `to`, a period that is too long | `{ "errors": [{ "field": "amount", "rule": "positive", "message": "..." }] }` or `{ "message": "..." }` |
 | `404`  | An unknown currency, a currency without a rate on that day, or a date before 4 January 1999                           | `{ "message": "No rate found from USD to XYZ on 2026-09-25" }`                                          |
 | `503`  | `/currencies` before the first sync                                                                                   | `{ "message": "No syncs yet" }`                                                                         |
+| `429`  | Too many requests, see [Rate limits](#rate-limits)                                                                    | `{ "errors": [{ "message": "Too many requests", "retryAfter": 60 }] }`                                  |
+
+### Rate limits
+
+Requests are limited per client IP address:
+
+| Endpoint            | Limit                  |
+| ------------------- | ---------------------- |
+| `/rates/timeseries` | 10 requests per minute |
+| Everything else     | 60 requests per minute |
+
+The two limits are counted separately. Every response has `X-RateLimit-Limit` and `X-RateLimit-Remaining` headers. Above the limit the API answers `429` with `Retry-After` (seconds) and `X-RateLimit-Reset` (an ISO timestamp) headers, and no `Cache-Control`.
 
 ### Caching
 
@@ -185,6 +197,20 @@ Postgres has to be running when the sync starts. A failed or missed run (for exa
 | `node ace fx:sync`                  | Last 90 days, or the full history when it is missing |
 | `node ace fx:backfill`              | Always imports the full history                      |
 | `node ace fx:backfill --if-missing` | Full history, skipped when it was already imported   |
+
+## Deploying behind a proxy
+
+The rate limits count per `request.ip()`. Behind a reverse proxy or load balancer, every request arrives from the proxy, so the real client IP has to come from the `X-Forwarded-For` header. The API only trusts that header from proxies listed in `TRUSTED_PROXIES` in `apps/backend/.env`, because any other client could forge it:
+
+| Setup                                        | `TRUSTED_PROXIES`                     |
+| -------------------------------------------- | ------------------------------------- |
+| No proxy, or nginx/Caddy on the same machine | leave it out (defaults to `loopback`) |
+| Proxy in another Docker container            | `loopback,uniquelocal`                |
+| Load balancer in a private network           | its subnet, such as `10.0.0.0/16`     |
+
+Values are [proxy-addr](https://www.npmjs.com/package/proxy-addr) names, IPs or CIDR ranges, comma-separated. An invalid value stops the app at startup. Never trust more than your own proxies: a range that also covers the internet lets clients pick their own IP and bypass the rate limits.
+
+To check a deployment, look at the keys in the `rate_limits` table: they should hold real client IPs, not the address of the proxy.
 
 ## Development
 
