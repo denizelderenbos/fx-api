@@ -201,7 +201,12 @@ Run these from the repository root:
 
 The tests need Postgres running. They use a separate `fx_api_test` database, which `docker compose` creates the first time it starts, so they never touch your development data. Functional tests call the endpoints through HTTP; the ECB is never contacted during tests.
 
-A Postman collection with example requests is in `apps/backend/postman`. Import both the collection and the `FX API lokaal` environment, which points to `http://localhost:3333`.
+A Postman collection with example requests is in `apps/backend/postman`. Every request has tests. Import both the collection and the `FX API lokaal` environment, which points to `http://localhost:3333`, or run it against the running development server from the command line:
+
+```bash
+npx newman run apps/backend/postman/fx-api.postman_collection.json \
+  -e apps/backend/postman/fx-api-lokaal.postman_environment.json
+```
 
 ## Project structure
 

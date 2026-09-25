@@ -8,6 +8,10 @@
     {
       "key": "baseUrl",
       "value": "http://localhost:3333"
+    },
+    {
+      "key": "recentFrom",
+      "value": ""
     }
   ],
   "item": [
@@ -263,8 +267,8 @@
                   "pm.test(\"JSON body\", () => pm.response.to.be.json);",
                   "pm.test(\"Cache-Control is public\", () => pm.expect(pm.response.headers.get(\"Cache-Control\")).to.match(/public, max-age=\\d+/));",
                   "const body = pm.response.json();",
-                  "pm.test(\"koersset heeft base, requested_date, date en rates\", () => {",
-                  "  pm.expect(body).to.include.all.keys(\"base\", \"requested_date\", \"date\", \"rates\");",
+                  "pm.test(\"koersset heeft base, date en rates\", () => {",
+                  "  pm.expect(body).to.have.all.keys(\"base\", \"date\", \"rates\");",
                   "  pm.expect(body.date).to.match(/^\\d{4}-\\d{2}-\\d{2}$/);",
                   "  for (const [code, rate] of Object.entries(body.rates)) {",
                   "    pm.expect(code).to.match(/^[A-Z]{3}$/);",
@@ -273,7 +277,8 @@
                   "});",
                   "pm.test(\"datum is de gevraagde datum\", () => pm.expect(pm.response.json().date).to.equal(\"2024-01-15\"));",
                   "pm.test(\"precies EUR en GBP\", () => pm.expect(Object.keys(pm.response.json().rates).sort()).to.deep.equal([\"EUR\", \"GBP\"]));",
-                  "pm.test(\"USD naar EUR ligt rond 0.91\", () => pm.expect(Number(pm.response.json().rates.EUR)).to.be.within(0.85, 0.95));"
+                  "pm.test(\"USD naar EUR ligt rond 0.91\", () => pm.expect(Number(pm.response.json().rates.EUR)).to.be.within(0.85, 0.95));",
+                  "pm.test(\"Een jaar gecachet\", () => pm.expect(pm.response.headers.get(\"Cache-Control\")).to.equal(\"public, max-age=31536000\"));"
                 ]
               }
             }
@@ -310,8 +315,8 @@
                 "exec": [
                   "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
                   "const body = pm.response.json();",
-                  "pm.test(\"koersset heeft base, requested_date, date en rates\", () => {",
-                  "  pm.expect(body).to.include.all.keys(\"base\", \"requested_date\", \"date\", \"rates\");",
+                  "pm.test(\"koersset heeft base, date en rates\", () => {",
+                  "  pm.expect(body).to.have.all.keys(\"base\", \"date\", \"rates\");",
                   "  pm.expect(body.date).to.match(/^\\d{4}-\\d{2}-\\d{2}$/);",
                   "  for (const [code, rate] of Object.entries(body.rates)) {",
                   "    pm.expect(code).to.match(/^[A-Z]{3}$/);",
@@ -319,10 +324,7 @@
                   "  }",
                   "});",
                   "pm.test(\"base is EUR (default)\", () => pm.expect(pm.response.json().base).to.equal(\"EUR\"));",
-                  "pm.test(\"requested_date 2024-01-13, date 2024-01-12\", () => {",
-                  "  pm.expect(pm.response.json().requested_date).to.equal(\"2024-01-13\");",
-                  "  pm.expect(pm.response.json().date).to.equal(\"2024-01-12\");",
-                  "});",
+                  "pm.test(\"date is vrijdag 2024-01-12\", () => pm.expect(pm.response.json().date).to.equal(\"2024-01-12\"));",
                   "pm.test(\"alle actieve valuta, EUR niet als eigen koers\", () => {",
                   "  const rates = pm.response.json().rates;",
                   "  pm.expect(Object.keys(rates).length).to.be.above(20);",
@@ -417,8 +419,8 @@
                 "exec": [
                   "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
                   "const body = pm.response.json();",
-                  "pm.test(\"koersset heeft base, requested_date, date en rates\", () => {",
-                  "  pm.expect(body).to.include.all.keys(\"base\", \"requested_date\", \"date\", \"rates\");",
+                  "pm.test(\"koersset heeft base, date en rates\", () => {",
+                  "  pm.expect(body).to.have.all.keys(\"base\", \"date\", \"rates\");",
                   "  pm.expect(body.date).to.match(/^\\d{4}-\\d{2}-\\d{2}$/);",
                   "  for (const [code, rate] of Object.entries(body.rates)) {",
                   "    pm.expect(code).to.match(/^[A-Z]{3}$/);",
@@ -733,7 +735,8 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
-                  "pm.test(\"date is niet in de toekomst\", () => pm.expect(pm.response.json().date <= new Date().toISOString().slice(0, 10)).to.be.true);"
+                  "pm.test(\"date is niet in de toekomst\", () => pm.expect(pm.response.json().date <= new Date().toISOString().slice(0, 10)).to.be.true);",
+                  "pm.test(\"Vijf minuten gecachet\", () => pm.expect(pm.response.headers.get(\"Cache-Control\")).to.equal(\"public, max-age=300\"));"
                 ]
               }
             }
@@ -743,7 +746,6 @@
     },
     {
       "name": "Rates latest",
-      "description": "Route staat nog uitgecommentarieerd in start/routes.ts.",
       "item": [
         {
           "name": "Latest, USD naar EUR en GBP",
@@ -786,8 +788,8 @@
                 "exec": [
                   "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
                   "const body = pm.response.json();",
-                  "pm.test(\"koersset heeft base, requested_date, date en rates\", () => {",
-                  "  pm.expect(body).to.include.all.keys(\"base\", \"requested_date\", \"date\", \"rates\");",
+                  "pm.test(\"koersset heeft base, date en rates\", () => {",
+                  "  pm.expect(body).to.have.all.keys(\"base\", \"date\", \"rates\");",
                   "  pm.expect(body.date).to.match(/^\\d{4}-\\d{2}-\\d{2}$/);",
                   "  for (const [code, rate] of Object.entries(body.rates)) {",
                   "    pm.expect(code).to.match(/^[A-Z]{3}$/);",
@@ -797,7 +799,8 @@
                   "pm.test(\"date is maximaal 5 dagen oud\", () => {",
                   "  const ageDays = (Date.now() - new Date(pm.response.json().date)) / 86400000;",
                   "  pm.expect(ageDays).to.be.below(5);",
-                  "});"
+                  "});",
+                  "pm.test(\"Vijf minuten gecachet\", () => pm.expect(pm.response.headers.get(\"Cache-Control\")).to.equal(\"public, max-age=300\"));"
                 ]
               }
             }
@@ -834,8 +837,8 @@
                 "exec": [
                   "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
                   "const body = pm.response.json();",
-                  "pm.test(\"koersset heeft base, requested_date, date en rates\", () => {",
-                  "  pm.expect(body).to.include.all.keys(\"base\", \"requested_date\", \"date\", \"rates\");",
+                  "pm.test(\"koersset heeft base, date en rates\", () => {",
+                  "  pm.expect(body).to.have.all.keys(\"base\", \"date\", \"rates\");",
                   "  pm.expect(body.date).to.match(/^\\d{4}-\\d{2}-\\d{2}$/);",
                   "  for (const [code, rate] of Object.entries(body.rates)) {",
                   "    pm.expect(code).to.match(/^[A-Z]{3}$/);",
@@ -851,11 +854,10 @@
       ]
     },
     {
-      "name": "Nog te bouwen (ontwerp)",
-      "description": "Endpoints uit het systeemontwerp die nog niet bestaan. Verwacht 404 tot ze er zijn.",
+      "name": "Timeseries",
       "item": [
         {
-          "name": "Timeseries USD naar EUR, Q1 2024",
+          "name": "USD naar EUR, Q1 2024",
           "request": {
             "method": "GET",
             "header": [
@@ -901,14 +903,325 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));"
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.test(\"reeks heeft base, start_date, end_date en rates\", () => pm.expect(body).to.have.all.keys(\"base\", \"start_date\", \"end_date\", \"rates\"));",
+                  "pm.test(\"start en eind zijn handelsdagen: 1 januari en Goede Vrijdag vallen af\", () => {",
+                  "  pm.expect(body.start_date).to.equal(\"2024-01-02\");",
+                  "  pm.expect(body.end_date).to.equal(\"2024-03-28\");",
+                  "});",
+                  "pm.test(\"per dag alleen EUR, als string met zes decimalen\", () => {",
+                  "  for (const [date, rates] of Object.entries(body.rates)) {",
+                  "    pm.expect(date).to.match(/^\\d{4}-\\d{2}-\\d{2}$/);",
+                  "    pm.expect(rates).to.have.all.keys(\"EUR\");",
+                  "    pm.expect(rates.EUR, date).to.match(/^\\d+\\.\\d{6}$/);",
+                  "  }",
+                  "});",
+                  "pm.test(\"geen weekenden\", () => {",
+                  "  for (const date of Object.keys(body.rates)) pm.expect([0, 6], date).to.not.include(new Date(date).getUTCDay());",
+                  "});",
+                  "pm.test(\"Een jaar gecachet\", () => pm.expect(pm.response.headers.get(\"Cache-Control\")).to.equal(\"public, max-age=31536000\"));"
                 ]
               }
             }
           ]
         },
         {
-          "name": "Convert 100 USD naar GBP op datum",
+          "name": "Zonder to loopt tot de laatste dag",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/rates/timeseries?symbols=USD&from={{recentFrom}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "rates",
+                "timeseries"
+              ],
+              "query": [
+                {
+                  "key": "symbols",
+                  "value": "USD"
+                },
+                {
+                  "key": "from",
+                  "value": "{{recentFrom}}"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const from = new Date(Date.now() - 30 * 86400000).toISOString().slice(0, 10);",
+                  "pm.collectionVariables.set(\"recentFrom\", from);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"end_date is niet in de toekomst\", () => pm.expect(pm.response.json().end_date <= new Date().toISOString().slice(0, 10)).to.be.true);",
+                  "pm.test(\"Vijf minuten gecachet\", () => pm.expect(pm.response.headers.get(\"Cache-Control\")).to.equal(\"public, max-age=300\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "from na to (422)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/rates/timeseries?from=2024-03-01&to=2024-01-01",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "rates",
+                "timeseries"
+              ],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "2024-03-01"
+                },
+                {
+                  "key": "to",
+                  "value": "2024-01-01"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 422\", () => pm.response.to.have.status(422));",
+                  "pm.test(\"heeft een message\", () => pm.expect(pm.response.json().message).to.be.a(\"string\"));",
+                  "pm.test(\"Fout is niet cachebaar\", () => pm.expect(pm.response.headers.get(\"Cache-Control\") || \"\").to.not.include(\"public\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Langer dan 5 jaar (422)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/rates/timeseries?symbols=USD&from=2015-01-01&to=2024-01-01",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "rates",
+                "timeseries"
+              ],
+              "query": [
+                {
+                  "key": "symbols",
+                  "value": "USD"
+                },
+                {
+                  "key": "from",
+                  "value": "2015-01-01"
+                },
+                {
+                  "key": "to",
+                  "value": "2024-01-01"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 422\", () => pm.response.to.have.status(422));",
+                  "pm.test(\"heeft een message\", () => pm.expect(pm.response.json().message).to.be.a(\"string\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Langer dan een jaar zonder symbols (422)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/rates/timeseries?from=2022-01-01&to=2024-01-01",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "rates",
+                "timeseries"
+              ],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "2022-01-01"
+                },
+                {
+                  "key": "to",
+                  "value": "2024-01-01"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 422\", () => pm.response.to.have.status(422));",
+                  "pm.test(\"heeft een message\", () => pm.expect(pm.response.json().message).to.be.a(\"string\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "from ontbreekt (422)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/rates/timeseries?to=2024-01-01",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "rates",
+                "timeseries"
+              ],
+              "query": [
+                {
+                  "key": "to",
+                  "value": "2024-01-01"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 422\", () => pm.response.to.have.status(422));",
+                  "pm.test(\"fout op veld from\", () => pm.expect(pm.response.json().errors.map((e) => e.field)).to.include(\"from\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Periode zonder handelsdagen (404)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/rates/timeseries?from=1998-01-01&to=1998-12-31",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "rates",
+                "timeseries"
+              ],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "1998-01-01"
+                },
+                {
+                  "key": "to",
+                  "value": "1998-12-31"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 404\", () => pm.response.to.have.status(404));",
+                  "pm.test(\"heeft een message\", () => pm.expect(pm.response.json().message).to.be.a(\"string\"));",
+                  "pm.test(\"Fout is niet cachebaar\", () => pm.expect(pm.response.headers.get(\"Cache-Control\") || \"\").to.not.include(\"public\"));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Convert",
+      "item": [
+        {
+          "name": "100 USD naar GBP op datum",
           "request": {
             "method": "GET",
             "header": [
@@ -954,14 +1267,25 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
-                  "pm.test(\"amount, rate en result aanwezig\", () => pm.expect(pm.response.json()).to.include.all.keys(\"amount\", \"rate\", \"result\"));"
+                  "const body = pm.response.json();",
+                  "pm.test(\"conversie heeft from, to, date, amount, rate en result\", () => {",
+                  "  pm.expect(body).to.have.all.keys(\"from\", \"to\", \"date\", \"amount\", \"rate\", \"result\");",
+                  "  pm.expect(body.rate).to.match(/^\\d+\\.\\d{6}$/);",
+                  "  pm.expect(body.result).to.match(/^\\d+\\.\\d{6}$/);",
+                  "});",
+                  "pm.test(\"datum en bedrag kloppen\", () => {",
+                  "  pm.expect(body.date).to.equal(\"2024-01-15\");",
+                  "  pm.expect(body.amount).to.equal(\"100\");",
+                  "});",
+                  "pm.test(\"result is amount maal rate\", () => pm.expect(Number(body.result)).to.be.closeTo(100 * Number(body.rate), 0.0001));",
+                  "pm.test(\"Een jaar gecachet\", () => pm.expect(pm.response.headers.get(\"Cache-Control\")).to.equal(\"public, max-age=31536000\"));"
                 ]
               }
             }
           ]
         },
         {
-          "name": "Convert zonder datum (latest)",
+          "name": "Zonder datum (latest)",
           "request": {
             "method": "GET",
             "header": [
@@ -1002,7 +1326,268 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));"
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.test(\"conversie heeft from, to, date, amount, rate en result\", () => {",
+                  "  pm.expect(body).to.have.all.keys(\"from\", \"to\", \"date\", \"amount\", \"rate\", \"result\");",
+                  "  pm.expect(body.rate).to.match(/^\\d+\\.\\d{6}$/);",
+                  "  pm.expect(body.result).to.match(/^\\d+\\.\\d{6}$/);",
+                  "});",
+                  "pm.test(\"Vijf minuten gecachet\", () => pm.expect(pm.response.headers.get(\"Cache-Control\")).to.equal(\"public, max-age=300\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Zaterdag valt terug op vrijdag",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/convert?from=USD&to=GBP&amount=100&date=2024-01-13",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "convert"
+              ],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "USD"
+                },
+                {
+                  "key": "to",
+                  "value": "GBP"
+                },
+                {
+                  "key": "amount",
+                  "value": "100"
+                },
+                {
+                  "key": "date",
+                  "value": "2024-01-13"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"date is vrijdag 2024-01-12\", () => pm.expect(pm.response.json().date).to.equal(\"2024-01-12\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Naar zichzelf is 1:1",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/convert?from=USD&to=USD&amount=42&date=2024-01-15",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "convert"
+              ],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "USD"
+                },
+                {
+                  "key": "to",
+                  "value": "USD"
+                },
+                {
+                  "key": "amount",
+                  "value": "42"
+                },
+                {
+                  "key": "date",
+                  "value": "2024-01-15"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"rate 1 en result gelijk aan amount\", () => {",
+                  "  pm.expect(pm.response.json().rate).to.equal(\"1.000000\");",
+                  "  pm.expect(pm.response.json().result).to.equal(\"42.000000\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Onbekende valuta (404)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/convert?from=USD&to=XYZ&amount=100",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "convert"
+              ],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "USD"
+                },
+                {
+                  "key": "to",
+                  "value": "XYZ"
+                },
+                {
+                  "key": "amount",
+                  "value": "100"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 404\", () => pm.response.to.have.status(404));",
+                  "pm.test(\"heeft een message\", () => pm.expect(pm.response.json().message).to.be.a(\"string\"));",
+                  "pm.test(\"Fout is niet cachebaar\", () => pm.expect(pm.response.headers.get(\"Cache-Control\") || \"\").to.not.include(\"public\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Negatief bedrag (422)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/convert?from=USD&to=GBP&amount=-1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "convert"
+              ],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "USD"
+                },
+                {
+                  "key": "to",
+                  "value": "GBP"
+                },
+                {
+                  "key": "amount",
+                  "value": "-1"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 422\", () => pm.response.to.have.status(422));",
+                  "pm.test(\"fout op veld amount\", () => pm.expect(pm.response.json().errors.map((e) => e.field)).to.include(\"amount\"));",
+                  "pm.test(\"Fout is niet cachebaar\", () => pm.expect(pm.response.headers.get(\"Cache-Control\") || \"\").to.not.include(\"public\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Bedrag ontbreekt (422)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/convert?from=USD&to=GBP",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "convert"
+              ],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "USD"
+                },
+                {
+                  "key": "to",
+                  "value": "GBP"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 422\", () => pm.response.to.have.status(422));",
+                  "pm.test(\"fout op veld amount\", () => pm.expect(pm.response.json().errors.map((e) => e.field)).to.include(\"amount\"));"
                 ]
               }
             }
