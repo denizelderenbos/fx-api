@@ -5,6 +5,7 @@ import type { Config } from '@japa/runner/types'
 import { pluginAdonisJS } from '@japa/plugin-adonisjs'
 import { dbAssertions } from '@adonisjs/lucid/plugins/db'
 import testUtils from '@adonisjs/core/services/test_utils'
+import limiter from '@adonisjs/limiter/services/main'
 import { authApiClient } from '@adonisjs/auth/plugins/api_client'
 import { sessionApiClient } from '@adonisjs/session/plugins/api_client'
 import type { Registry } from '../.adonisjs/client/registry/schema.d.ts'
@@ -50,6 +51,13 @@ export const runnerHooks: Required<Pick<Config, 'setup' | 'teardown'>> = {
  * Learn more - https://japa.dev/docs/test-suites#lifecycle-hooks
  */
 export const configureSuite: Config['configureSuite'] = (suite) => {
+  /**
+   * Every test sends its requests from the same IP, so rate limit counters
+   * would carry over from one test to the next. Start each test at zero.
+   */
+  suite.onGroup((group) => group.each.setup(() => limiter.clear()))
+  suite.onTest((t) => t.setup(() => limiter.clear()))
+
   if (['browser', 'functional', 'e2e'].includes(suite.name)) {
     suite.setup(() => testUtils.db().migrate())
     return suite.setup(() => testUtils.httpServer().start())

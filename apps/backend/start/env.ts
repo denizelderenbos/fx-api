@@ -32,4 +32,22 @@ export default await Env.create(new URL('../', import.meta.url), {
   PG_USER: Env.schema.string(),
   PG_PASSWORD: Env.schema.string.optional(),
   PG_DB_NAME: Env.schema.string(),
+
+  /*
+  |----------------------------------------------------------
+  | Variables for configuring the limiter package
+  |----------------------------------------------------------
+  */
+  LIMITER_STORE: Env.schema.enum(['database', 'memory'] as const),
+
+  /*
+  |----------------------------------------------------------
+  | Proxies whose X-Forwarded-For header is trusted
+  |----------------------------------------------------------
+  |
+  | Comma-separated proxy-addr values: 'loopback', 'uniquelocal', an IP
+  | or a CIDR range. Defaults to 'loopback' (a proxy on the same machine).
+  |
+  */
+  TRUSTED_PROXIES: Env.schema.string.optional(),
 })

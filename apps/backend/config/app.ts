@@ -1,5 +1,6 @@
 import env from '#start/env'
 import app from '@adonisjs/core/services/app'
+import proxyAddr from 'proxy-addr'
 import { defineConfig } from '@adonisjs/core/http'
 
 /**
@@ -18,6 +19,16 @@ export const http = defineConfig({
    * Useful to correlate logs and debug a request flow.
    */
   generateRequestId: true,
+
+  /**
+   * Proxies allowed to set X-Forwarded-For. Only a request that comes from one
+   * of them reports the client IP from that header; any other client could
+   * forge it. request.ip(), and with it the rate limiter, depends on this.
+   * Set TRUSTED_PROXIES per deployment; see the README.
+   */
+  trustProxy: proxyAddr.compile(
+    (env.get('TRUSTED_PROXIES') ?? 'loopback').split(',').map((value) => value.trim())
+  ),
 
   /**
    * Allow HTTP method spoofing via the "_method" form/query parameter.
