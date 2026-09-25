@@ -19,6 +19,18 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/currencies_controller').default['index']>>> | { status: 422; response: { errors: SimpleError[] } }
     }
   }
+  'rates.latest_rates': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/rates/latest'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: ExtractQueryForGet<InferInput<(typeof import('#validators/rate').latestRatesValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/rates_controller').default['latestRates']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/rates_controller').default['latestRates']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
   'rates.rates_by_date': {
     methods: ["GET","HEAD"]
     pattern: '/api/v1/rates/:date'

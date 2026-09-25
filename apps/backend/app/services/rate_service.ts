@@ -20,7 +20,7 @@ export class RateService {
     opts: { symbols: string[]; base: string }
   ): Promise<RateSet | null> {
     const latestDate = await this.latestDate()
-    if (!latestDate) return null // nog nooit gesynct
+    if (!latestDate) return null
 
     const { base, symbols } = opts
 
