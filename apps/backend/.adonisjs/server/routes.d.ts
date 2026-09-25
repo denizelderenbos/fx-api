@@ -4,21 +4,25 @@ type ParamValue = string | number | bigint | boolean
 
 export type ScannedRoutes = {
   ALL: {
-    'auth.new_account.store': { paramsTuple?: []; params?: {} }
-    'auth.access_tokens.store': { paramsTuple?: []; params?: {} }
-    'profile.profile.show': { paramsTuple?: []; params?: {} }
-    'profile.access_tokens.destroy': { paramsTuple?: []; params?: {} }
+    'currencies.index': { paramsTuple?: []; params?: {} }
+    'rates.latest_rates': { paramsTuple?: []; params?: {} }
+    'rates.timeseries': { paramsTuple?: []; params?: {} }
+    'rates.rates_by_date': { paramsTuple: [ParamValue]; params: {'date': ParamValue} }
+    'conversions.show': { paramsTuple?: []; params?: {} }
   }
   GET: {
-    'profile.profile.show': { paramsTuple?: []; params?: {} }
+    'currencies.index': { paramsTuple?: []; params?: {} }
+    'rates.latest_rates': { paramsTuple?: []; params?: {} }
+    'rates.timeseries': { paramsTuple?: []; params?: {} }
+    'rates.rates_by_date': { paramsTuple: [ParamValue]; params: {'date': ParamValue} }
+    'conversions.show': { paramsTuple?: []; params?: {} }
   }
   HEAD: {
-    'profile.profile.show': { paramsTuple?: []; params?: {} }
-  }
-  POST: {
-    'auth.new_account.store': { paramsTuple?: []; params?: {} }
-    'auth.access_tokens.store': { paramsTuple?: []; params?: {} }
-    'profile.access_tokens.destroy': { paramsTuple?: []; params?: {} }
+    'currencies.index': { paramsTuple?: []; params?: {} }
+    'rates.latest_rates': { paramsTuple?: []; params?: {} }
+    'rates.timeseries': { paramsTuple?: []; params?: {} }
+    'rates.rates_by_date': { paramsTuple: [ParamValue]; params: {'date': ParamValue} }
+    'conversions.show': { paramsTuple?: []; params?: {} }
   }
 }
 declare module '@adonisjs/core/types/http' {

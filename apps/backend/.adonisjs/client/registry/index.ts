@@ -6,29 +6,35 @@ import type { ApiDefinition } from './tree.d.ts'
 const placeholder: any = {}
 
 const routes = {
-  'auth.new_account.store': {
-    methods: ["POST"],
-    pattern: '/api/v1/auth/signup',
-    tokens: [{"old":"/api/v1/auth/signup","type":0,"val":"api","end":""},{"old":"/api/v1/auth/signup","type":0,"val":"v1","end":""},{"old":"/api/v1/auth/signup","type":0,"val":"auth","end":""},{"old":"/api/v1/auth/signup","type":0,"val":"signup","end":""}],
-    types: placeholder as Registry['auth.new_account.store']['types'],
-  },
-  'auth.access_tokens.store': {
-    methods: ["POST"],
-    pattern: '/api/v1/auth/login',
-    tokens: [{"old":"/api/v1/auth/login","type":0,"val":"api","end":""},{"old":"/api/v1/auth/login","type":0,"val":"v1","end":""},{"old":"/api/v1/auth/login","type":0,"val":"auth","end":""},{"old":"/api/v1/auth/login","type":0,"val":"login","end":""}],
-    types: placeholder as Registry['auth.access_tokens.store']['types'],
-  },
-  'profile.profile.show': {
+  'currencies.index': {
     methods: ["GET","HEAD"],
-    pattern: '/api/v1/account/profile',
-    tokens: [{"old":"/api/v1/account/profile","type":0,"val":"api","end":""},{"old":"/api/v1/account/profile","type":0,"val":"v1","end":""},{"old":"/api/v1/account/profile","type":0,"val":"account","end":""},{"old":"/api/v1/account/profile","type":0,"val":"profile","end":""}],
-    types: placeholder as Registry['profile.profile.show']['types'],
+    pattern: '/api/v1/currencies',
+    tokens: [{"old":"/api/v1/currencies","type":0,"val":"api","end":""},{"old":"/api/v1/currencies","type":0,"val":"v1","end":""},{"old":"/api/v1/currencies","type":0,"val":"currencies","end":""}],
+    types: placeholder as Registry['currencies.index']['types'],
   },
-  'profile.access_tokens.destroy': {
-    methods: ["POST"],
-    pattern: '/api/v1/account/logout',
-    tokens: [{"old":"/api/v1/account/logout","type":0,"val":"api","end":""},{"old":"/api/v1/account/logout","type":0,"val":"v1","end":""},{"old":"/api/v1/account/logout","type":0,"val":"account","end":""},{"old":"/api/v1/account/logout","type":0,"val":"logout","end":""}],
-    types: placeholder as Registry['profile.access_tokens.destroy']['types'],
+  'rates.latest_rates': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/rates/latest',
+    tokens: [{"old":"/api/v1/rates/latest","type":0,"val":"api","end":""},{"old":"/api/v1/rates/latest","type":0,"val":"v1","end":""},{"old":"/api/v1/rates/latest","type":0,"val":"rates","end":""},{"old":"/api/v1/rates/latest","type":0,"val":"latest","end":""}],
+    types: placeholder as Registry['rates.latest_rates']['types'],
+  },
+  'rates.timeseries': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/rates/timeseries',
+    tokens: [{"old":"/api/v1/rates/timeseries","type":0,"val":"api","end":""},{"old":"/api/v1/rates/timeseries","type":0,"val":"v1","end":""},{"old":"/api/v1/rates/timeseries","type":0,"val":"rates","end":""},{"old":"/api/v1/rates/timeseries","type":0,"val":"timeseries","end":""}],
+    types: placeholder as Registry['rates.timeseries']['types'],
+  },
+  'rates.rates_by_date': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/rates/:date',
+    tokens: [{"old":"/api/v1/rates/:date","type":0,"val":"api","end":""},{"old":"/api/v1/rates/:date","type":0,"val":"v1","end":""},{"old":"/api/v1/rates/:date","type":0,"val":"rates","end":""},{"old":"/api/v1/rates/:date","type":1,"val":"date","end":""}],
+    types: placeholder as Registry['rates.rates_by_date']['types'],
+  },
+  'conversions.show': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/convert',
+    tokens: [{"old":"/api/v1/convert","type":0,"val":"api","end":""},{"old":"/api/v1/convert","type":0,"val":"v1","end":""},{"old":"/api/v1/convert","type":0,"val":"convert","end":""}],
+    types: placeholder as Registry['conversions.show']['types'],
   },
 } as const satisfies Record<string, AdonisEndpoint>
 

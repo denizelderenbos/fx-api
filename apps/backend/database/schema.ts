@@ -32,6 +32,63 @@ export class AuthAccessTokenSchema extends BaseModel {
   declare updatedAt: DateTime | null
 }
 
+export class CurrencySchema extends BaseModel {
+  static $columns = ['code', 'createdAt', 'firstDate', 'isActive', 'lastDate', 'name', 'updatedAt'] as const
+  $columns = CurrencySchema.$columns
+  @column({ isPrimary: true })
+  declare code: string
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column.date()
+  declare firstDate: DateTime | null
+  @column()
+  declare isActive: boolean
+  @column.date()
+  declare lastDate: DateTime | null
+  @column()
+  declare name: string
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+}
+
+export class RateSchema extends BaseModel {
+  static $columns = ['createdAt', 'currency', 'date', 'id', 'rate', 'updatedAt'] as const
+  $columns = RateSchema.$columns
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare currency: string
+  @column.date()
+  declare date: DateTime
+  @column({ isPrimary: true })
+  declare id: number
+  @column()
+  declare rate: string
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+}
+
+export class SyncRunSchema extends BaseModel {
+  static $columns = ['error', 'finishedAt', 'id', 'latestDate', 'rowsUpserted', 'source', 'startedAt', 'status'] as const
+  $columns = SyncRunSchema.$columns
+  @column()
+  declare error: string | null
+  @column.dateTime()
+  declare finishedAt: DateTime | null
+  @column({ isPrimary: true })
+  declare id: number
+  @column.date()
+  declare latestDate: DateTime | null
+  @column()
+  declare rowsUpserted: number | null
+  @column()
+  declare source: string
+  @column.dateTime()
+  declare startedAt: DateTime
+  @column()
+  declare status: string | null
+}
+
 export class UserSchema extends BaseModel {
   static $columns = ['createdAt', 'email', 'fullName', 'id', 'password', 'updatedAt'] as const
   $columns = UserSchema.$columns
