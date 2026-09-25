@@ -21,6 +21,16 @@ export type TimeseriesRateSet = {
   rates: Record<string, DayRate>
 }
 
+export type Conversion = {
+  from: string
+  to: string
+  date: string
+  latestDate: string
+  amount: Big
+  rate: Big
+  result: Big
+}
+
 @inject()
 export class RateService {
   constructor(protected logger: Logger) {}
@@ -110,5 +120,33 @@ export class RateService {
         .filter((row) => row.currency !== base)
         .map((row) => [row.currency, crossRate(baseRate, Big(row.rate))])
     )
+  }
+
+  /**
+   * Converts `amount` with the rate of the last trading day on or before
+   * `requestedDate`. Null when either currency has no rate on that day.
+   */
+  async convert(
+    requestedDate: string,
+    opts: { from: string; to: string; amount: Big }
+  ): Promise<Conversion | null> {
+    const { from, to, amount } = opts
+
+    const rateSet = await this.listRatesOn(requestedDate, { base: from, symbols: [to] })
+    if (!rateSet) return null
+
+    // The base is never part of its own rates; converting to itself is 1:1.
+    const rate = from === to ? Big(1) : rateSet.rates[to]
+    if (!rate) return null
+
+    return {
+      from,
+      to,
+      date: rateSet.date,
+      latestDate: rateSet.latestDate,
+      amount,
+      rate,
+      result: amount.times(rate),
+    }
   }
 }

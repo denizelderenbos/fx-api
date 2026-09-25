@@ -26,6 +26,9 @@ router
     // GET /api/v1/rates/2024-01-15?base=USD&symbols=EUR,GBP
     router.get('rates/:date', [controllers.Rates, 'ratesByDate'])
 
+    // GET /api/v1/convert?from=USD&to=GBP&amount=100&date=2024-01-15
+    router.get('convert', [controllers.Rates, 'convert'])
+
     // router
     //   .group(() => {
     //     router.post('signup', [controllers.NewAccount, 'store'])

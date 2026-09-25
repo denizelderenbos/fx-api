@@ -1,6 +1,6 @@
 import { test } from '@japa/runner'
 import testUtils from '@adonisjs/core/services/test_utils'
-import { FRIDAY, MONDAY, seedRates } from '#tests/helpers/rates_seed'
+import { FRIDAY, MONDAY, seedRates, seedToday } from '#tests/helpers/rates_seed'
 
 const ENDPOINT = '/api/v1/rates/timeseries'
 const ONE_YEAR = 'public, max-age=31536000'
@@ -104,6 +104,16 @@ test.group('GET /api/v1/rates/timeseries', (group) => {
 
     response.assertStatus(200)
     assert.equal(response.body().end_date, MONDAY)
+    response.assertHeader('cache-control', FIVE_MINUTES)
+  })
+
+  test('without to it stays cached briefly, even once today is synced', async ({ client }) => {
+    await seedRates()
+    await seedToday()
+
+    const response = await client.get(url({ symbols: 'USD', from: '2024-01-01' }))
+
+    response.assertStatus(200)
     response.assertHeader('cache-control', FIVE_MINUTES)
   })
 

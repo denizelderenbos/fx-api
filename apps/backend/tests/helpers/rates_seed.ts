@@ -30,3 +30,17 @@ export async function seedRates() {
     { date: monday, currency: 'GBP', rate: '0.88' },
   ])
 }
+
+/**
+ * A synced day dated today, for behaviour that depends on "latest" being
+ * today, such as never caching an answer without an explicit date for long.
+ */
+export async function seedToday() {
+  const today = DateTime.now().startOf('day')
+
+  await Rate.createMany([
+    { date: today, currency: 'EUR', rate: '1' },
+    { date: today, currency: 'USD', rate: '1.3' },
+    { date: today, currency: 'GBP', rate: '0.9' },
+  ])
+}

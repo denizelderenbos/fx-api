@@ -35,6 +35,18 @@ const rateQuery = {
 /** GET /api/v1/rates/latest?base=USD&symbols=EUR,GBP */
 export const latestRatesValidator = vine.create(rateQuery)
 
+/** GET /api/v1/convert?from=USD&to=GBP&amount=100&date=2024-01-15 */
+export const convertValidator = vine.create({
+  from: currencyCode(),
+  to: currencyCode(),
+  amount: vine.number().positive(),
+  /** Omitted means the latest synced day. */
+  date: vine
+    .date({ formats: ['YYYY-MM-DD'] })
+    .optional()
+    .transform((value) => value.toISODate()!),
+})
+
 /** GET /api/v1/rates/timeseries?base=USD&symbols=EUR&from=2024-01-01&to=2024-03-31 */
 export const timeseriesValidator = vine.create({
   ...rateQuery,

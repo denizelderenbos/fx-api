@@ -30,6 +30,12 @@ const routes = {
     tokens: [{"old":"/api/v1/rates/:date","type":0,"val":"api","end":""},{"old":"/api/v1/rates/:date","type":0,"val":"v1","end":""},{"old":"/api/v1/rates/:date","type":0,"val":"rates","end":""},{"old":"/api/v1/rates/:date","type":1,"val":"date","end":""}],
     types: placeholder as Registry['rates.rates_by_date']['types'],
   },
+  'rates.convert': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/convert',
+    tokens: [{"old":"/api/v1/convert","type":0,"val":"api","end":""},{"old":"/api/v1/convert","type":0,"val":"v1","end":""},{"old":"/api/v1/convert","type":0,"val":"convert","end":""}],
+    types: placeholder as Registry['rates.convert']['types'],
+  },
 } as const satisfies Record<string, AdonisEndpoint>
 
 export { routes }
