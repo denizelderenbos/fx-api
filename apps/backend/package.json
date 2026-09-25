@@ -12,6 +12,7 @@
     "start": "node bin/server.js",
     "build": "node ace build",
     "dev": "node ace serve --hmr",
+    "setup": "node ace migration:run && node ace fx:backfill --if-missing",
     "codegen": "node ace codegen",
     "test": "node ace test",
     "lint": "eslint .",

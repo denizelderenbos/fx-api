@@ -1,0 +1,7 @@
+# fx:sync at 16:15, 17:15 and 18:15 on weekdays, Europe/Amsterdam.
+# The ECB publishes around 16:00 CET; the later runs pick up a late publication.
+# Times are in the system timezone: on a server in UTC, set CRON_TZ where your
+# cron supports it, or shift the hours.
+#
+# Install: crontab -e, then add the line below with the real path to the repo.
+15 16-18 * * 1-5 /path/to/fx-api/apps/backend/cron/fx_sync.sh

@@ -45,6 +45,26 @@ export class FxSyncService {
     }
   }
 
+  /** True once a full history import has succeeded. */
+  async hasFullHistory(): Promise<boolean> {
+    const run = await SyncRun.query().where('source', 'hist').where('status', 'ok').first()
+    return run !== null
+  }
+
+  /**
+   * Brings the rates up to date: the full history when it was never imported
+   * (a fresh install, or a backfill that failed), otherwise the last 90 days.
+   * The history file includes the recent days, so one of the two is enough.
+   */
+  async catchUp(): Promise<{ source: SyncSource; result: ImportResult }> {
+    const source: SyncSource = (await this.hasFullHistory()) ? '90d' : 'hist'
+    if (source === 'hist') {
+      this.logger.info('No complete ECB history yet, importing the full history first')
+    }
+
+    return { source, result: await this.sync(source) }
+  }
+
   private fetch(source: SyncSource) {
     switch (source) {
       case 'hist':

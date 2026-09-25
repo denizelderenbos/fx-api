@@ -13,6 +13,7 @@
   },
   "scripts": {
     "dev": "turbo dev",
+    "setup": "npm run setup -w @api-starter-kit/backend",
     "codegen": "turbo codegen",
     "build": "turbo build",
     "test": "turbo test",
